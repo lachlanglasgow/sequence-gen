@@ -1,36 +1,62 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Sequence Generator
 
-## Getting Started
+A visual node-based tool for building AI image generation pipelines. Chain prompts together, generate batches of images with matrix variations, and iterate on results — all from a drag-and-drop canvas.
 
-First, run the development server:
+## What It Does
+
+- **Node editor** — Connect prompt nodes, modification nodes, and image generation nodes into pipelines
+- **Image generation** — Generates images using Google Gemini models via a Python script
+- **Prompt modification** — Uses OpenRouter (Claude) to rewrite prompts with natural language instructions
+- **Matrix generation** — Define dimension variations and generate a grid of images from a template
+- **Project save/load** — Work is persisted locally in the browser
+
+## Node Types
+
+| Node | What It Does |
+|------|-------------|
+| **Base Prompt** | Write a starting text prompt |
+| **Modify Prompt** | Takes upstream text + your instruction, uses an LLM to rewrite it |
+| **Append Prompt** | Adds text to the end of an upstream prompt |
+| **Image** | Generates an image from upstream text (Gemini) |
+| **Matrix** | Generates a grid of images from dimension variations + a template |
+| **Multi Image** | Generates multiple images from a single prompt |
+
+## Requirements
+
+- **Node.js** 18+
+- **Python 3** with [uv](https://docs.astral.sh/uv/) installed
+- **Google Gemini API key** — for image generation
+- **OpenRouter API key** — for prompt modification (optional, only needed if you use Modify Prompt nodes)
+
+## Setup
+
+```bash
+git clone <repo-url>
+cd sequence-gen
+npm install
+```
+
+Create a `.env` file in the project root:
+
+```
+GEMINI_API_KEY=your_gemini_api_key_here
+OPENROUTER_API_KEY=your_openrouter_api_key_here
+```
+
+Get your keys:
+- Gemini: https://aistudio.google.com/apikey
+- OpenRouter: https://openrouter.ai/keys
+
+## Run
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## How It Works
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+The app is a Next.js frontend with API routes that call out to `generate_image.py` for Gemini image generation and OpenRouter for prompt rewriting. Images are saved to `public/generated/` and served back to the UI.
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Prompt nodes form a DAG — text flows from upstream nodes through edges to downstream nodes, where it becomes the input for image generation or LLM modification.
